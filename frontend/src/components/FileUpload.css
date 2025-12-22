@@ -1,0 +1,105 @@
+.file-upload-wrapper {
+    width: 100%;
+}
+
+.file-upload-area {
+    border: 2px dashed var(--border);
+    border-radius: var(--radius-lg);
+    padding: 3rem 2rem;
+    text-align: center;
+    cursor: pointer;
+    transition: all var(--transition-base);
+    background: var(--bg-card);
+}
+
+.file-upload-area:hover {
+    border-color: var(--border-focus);
+    background: var(--bg-card-hover);
+    transform: translateY(-2px);
+}
+
+.file-upload-area.dragging {
+    border-color: var(--primary);
+    background: rgba(102, 126, 234, 0.1);
+    transform: scale(1.02);
+}
+
+.upload-icon {
+    color: var(--primary);
+    margin-bottom: 1rem;
+    display: inline-block;
+}
+
+.file-upload-area h3 {
+    font-size: 1.25rem;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+}
+
+.file-upload-area p {
+    color: var(--text-secondary);
+    margin-bottom: 1rem;
+}
+
+.file-types {
+    display: inline-block;
+    padding: 0.5rem 1rem;
+    background: var(--bg-input);
+    border-radius: var(--radius-sm);
+    font-size: 0.875rem;
+    color: var(--text-muted);
+}
+
+.file-selected {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.5rem;
+    background: var(--bg-card);
+    border: 2px solid var(--primary);
+    border-radius: var(--radius-lg);
+    animation: slideIn 0.3s ease;
+}
+
+.file-info {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.file-icon {
+    color: var(--primary);
+    display: flex;
+    align-items: center;
+}
+
+.file-details {
+    text-align: left;
+}
+
+.file-name {
+    font-weight: 500;
+    margin-bottom: 0.25rem;
+}
+
+.file-size {
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+}
+
+.btn-remove {
+    padding: 0.5rem;
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    border-radius: var(--radius-sm);
+    transition: all var(--transition-fast);
+    display: flex;
+    align-items: center;
+}
+
+.btn-remove:hover {
+    background: rgba(248, 113, 113, 0.2);
+    color: #f87171;
+}
