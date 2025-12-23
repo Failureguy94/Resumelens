@@ -1,7 +1,9 @@
 import pdfParse from 'pdf-parse';
 import mammoth from 'mammoth';
 import fs from 'fs/promises';
-
+import dotenv from "dotenv";
+dotenv.config();
+import express from "express";
 /**
  * Parse resume from PDF or DOCX file
  * @param {string} filePath - Path to the resume file

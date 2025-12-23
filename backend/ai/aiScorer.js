@@ -1,7 +1,4 @@
 import OpenAI from 'openai';
-import dotenv from 'dotenv';
-
-dotenv.config();
 
 const openai = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY
@@ -19,7 +16,7 @@ export async function validateResume(text) {
 
     try {
         const completion = await openai.chat.completions.create({
-            model: 'gpt-4',
+            model: 'gpt-4o-mini',
             messages: [
                 {
                     role: 'system',
@@ -60,6 +57,16 @@ Respond with JSON only.`
         };
     } catch (error) {
         console.error('Resume validation error:', error);
+
+        // Handle specific OpenAI API errors
+        if (error.status === 429 || error.code === 'insufficient_quota') {
+            throw new Error('OpenAI API quota exceeded. Please check your billing details or try again later.');
+        } else if (error.status === 401 || error.code === 'invalid_api_key') {
+            throw new Error('Invalid OpenAI API key. Please check your configuration.');
+        } else if (error.code === 'ECONNREFUSED' || error.code === 'ENOTFOUND') {
+            throw new Error('Unable to connect to OpenAI API. Please check your internet connection.');
+        }
+
         throw new Error('Failed to validate document. Please try again.');
     }
 }
@@ -89,7 +96,7 @@ export async function scoreResumeWithAI(resumeText, evaluationParams) {
         }
 
         const completion = await openai.chat.completions.create({
-            model: 'gpt-4',
+            model: 'gpt-4o-mini',
             messages: [
                 {
                     role: 'system',
@@ -177,6 +184,16 @@ Respond in JSON format:
         };
     } catch (error) {
         console.error('AI scoring error:', error);
+
+        // Handle specific OpenAI API errors
+        if (error.status === 429 || error.code === 'insufficient_quota') {
+            throw new Error('OpenAI API quota exceeded. Please check your billing details or try again later.');
+        } else if (error.status === 401 || error.code === 'invalid_api_key') {
+            throw new Error('Invalid OpenAI API key. Please check your configuration.');
+        } else if (error.code === 'ECONNREFUSED' || error.code === 'ENOTFOUND') {
+            throw new Error('Unable to connect to OpenAI API. Please check your internet connection.');
+        }
+
         throw new Error('Failed to analyze resume. Please try again or check your OpenAI API key.');
     }
 }
