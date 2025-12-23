@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import toast, { Toaster } from 'react-hot-toast';
 import FileUpload from './FileUpload';
 import './LandingPage.css';
 
@@ -66,7 +67,20 @@ export default function LandingPage({ setAnalysisResult }) {
             navigate('/results');
         } catch (err) {
             console.error('Analysis error:', err);
-            setError(err.response?.data?.error || 'Failed to analyze resume. Please try again.');
+
+            // Show toast for validation errors
+            if (err.response?.data?.isToast) {
+                toast.error(err.response.data.message || err.response.data.error, {
+                    duration: 5000,
+                    style: {
+                        background: '#1a1a1a',
+                        color: '#fff',
+                        border: '1px solid rgba(255, 255, 255, 0.2)'
+                    }
+                });
+            } else {
+                setError(err.response?.data?.error || 'Failed to analyze resume. Please try again.');
+            }
         } finally {
             setLoading(false);
         }
@@ -84,11 +98,14 @@ export default function LandingPage({ setAnalysisResult }) {
                         Get instant, explainable ATS scores with AI-powered suggestions
                     </p>
                     <div className="hero-badges">
-                        <span className="badge">✨ Deterministic Scoring</span>
-                        <span className="badge">🎯 Role-Aware Analysis</span>
+                        <span className="badge">✨ AI-Powered Scoring</span>
+                        <span className="badge">🎯 Human-Like Analysis</span>
                         <span className="badge">🔒 100% Private</span>
                     </div>
                 </header>
+
+                {/* Toast Container */}
+                <Toaster position="top-right" />
 
                 {/* Main Form */}
                 <form className="evaluation-form fade-in" onSubmit={handleSubmit}>

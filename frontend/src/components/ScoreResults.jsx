@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { CircularProgressbar, buildStyles } from 'recharts';
 import ScoreCard from './ScoreCard';
 import './ScoreResults.css';
 
@@ -14,13 +13,14 @@ export default function ScoreResults({ analysisResult }) {
     }
 
     const { scoreResult, explanation, suggestions } = analysisResult;
-    const { overallScore, categoryScores, breakdown } = scoreResult;
+    const { overallScore, categories, keyStrengths, redFlags, detectedAbsurdities } = scoreResult;
 
+    // Monochrome score colors
     const getScoreColor = (score) => {
-        if (score >= 80) return '#4ade80'; // Excellent - Green
-        if (score >= 60) return '#60a5fa'; // Good - Blue
-        if (score >= 40) return '#fbbf24'; // Fair - Yellow
-        return '#f87171'; // Poor - Red
+        if (score >= 80) return '#ffffff'; // Excellent - White
+        if (score >= 60) return '#cccccc'; // Good - Light Gray
+        if (score >= 40) return '#999999'; // Fair - Medium Gray
+        return '#666666'; // Poor - Dark Gray
     };
 
     const getScoreLabel = (score) => {
@@ -30,36 +30,32 @@ export default function ScoreResults({ analysisResult }) {
         return 'Poor';
     };
 
-    const categories = [
-        {
-            key: 'keywordRelevance',
-            name: 'Keyword Relevance',
-            icon: '🔍',
-            score: categoryScores.keywordRelevance,
-            details: breakdown.keywordRelevance.details
-        },
-        {
-            key: 'roleAlignment',
-            name: 'Role Alignment',
-            icon: '🎯',
-            score: categoryScores.roleAlignment,
-            details: breakdown.roleAlignment.details
-        },
-        {
-            key: 'structure',
-            name: 'Resume Structure',
-            icon: '📋',
-            score: categoryScores.structure,
-            details: breakdown.structure.details
-        },
-        {
-            key: 'formatting',
-            name: 'ATS Formatting',
-            icon: '✨',
-            score: categoryScores.formatting,
-            details: breakdown.formatting.details
+    // Get icon based on category name (dynamic)
+    const getCategoryIcon = (name) => {
+        const nameLower = name.toLowerCase();
+        if (nameLower.includes('keyword') || nameLower.includes('relevance')) return '🔍';
+        if (nameLower.includes('experience') || nameLower.includes('work')) return '�';
+        if (nameLower.includes('skill') || nameLower.includes('technical')) return '⚡';
+        if (nameLower.includes('education') || nameLower.includes('academic')) return '🎓';
+        if (nameLower.includes('format') || nameLower.includes('structure')) return '📋';
+        if (nameLower.includes('achievement') || nameLower.includes('impact')) return '🏆';
+        if (nameLower.includes('quality') || nameLower.includes('professional')) return '✨';
+        return '📊'; // Default
+    };
+
+    // Use dynamic categories from AI
+    const dynamicCategories = categories?.map((cat, index) => ({
+        key: `category-${index}`,
+        name: cat.name,
+        icon: getCategoryIcon(cat.name),
+        score: cat.score,
+        weight: cat.weight,
+        details: {
+            reasoning: cat.reasoning,
+            strengths: cat.strengths,
+            weaknesses: cat.weaknesses
         }
-    ];
+    })) || [];
 
     return (
         <div className="score-results">
@@ -96,11 +92,11 @@ export default function ScoreResults({ analysisResult }) {
                     </div>
                 </div>
 
-                {/* Category Breakdown */}
+                {/* Category Breakdown - Dynamic AI Categories */}
                 <section className="category-section fade-in">
-                    <h2 className="section-heading">Category Breakdown</h2>
+                    <h2 className="section-heading">AI Analysis Breakdown</h2>
                     <div className="category-grid">
-                        {categories.map((category) => (
+                        {dynamicCategories.map((category) => (
                             <ScoreCard
                                 key={category.key}
                                 category={category}
@@ -112,6 +108,27 @@ export default function ScoreResults({ analysisResult }) {
                         ))}
                     </div>
                 </section>
+
+                {/* Red Flags / Absurdities */}
+                {(redFlags?.length > 0 || detectedAbsurdities?.length > 0) && (
+                    <section className="warnings-section fade-in">
+                        <h2 className="section-heading">⚠️ Areas of Concern</h2>
+                        <div className="warnings-list">
+                            {redFlags?.map((flag, index) => (
+                                <div key={index} className="warning-item">
+                                    <span className="warning-icon">⚠️</span>
+                                    <p>{flag}</p>
+                                </div>
+                            ))}
+                            {detectedAbsurdities?.map((absurdity, index) => (
+                                <div key={`abs-${index}`} className="warning-item absurdity">
+                                    <span className="warning-icon">🚨</span>
+                                    <p><strong>Detected Issue:</strong> {absurdity}</p>
+                                </div>
+                            ))}
+                        </div>
+                    </section>
+                )}
 
                 {/* AI Suggestions */}
                 {suggestions && suggestions.length > 0 && (
@@ -152,7 +169,7 @@ export default function ScoreResults({ analysisResult }) {
                     {/* Skills that Helped */}
                     {breakdown.roleAlignment.details.coreSkills?.length > 0 && (
                         <div className="detail-card">
-                            <h3>✅ Skills That Helped</h3>
+                            <h3> Skills That Helped</h3>
                             <div className="skill-tags">
                                 {breakdown.roleAlignment.details.coreSkills.slice(0, 10).map((item, index) => (
                                     <span key={index} className="skill-tag core">
@@ -180,7 +197,7 @@ export default function ScoreResults({ analysisResult }) {
                     {/* Missing Skills */}
                     {breakdown.roleAlignment.details.missingCoreSkills?.length > 0 && (
                         <div className="detail-card">
-                            <h3>❌ Missing Core Skills</h3>
+                            <h3> Missing Core Skills</h3>
                             <div className="skill-tags">
                                 {breakdown.roleAlignment.details.missingCoreSkills.map((skill, index) => (
                                     <span key={index} className="skill-tag missing">

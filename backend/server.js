@@ -7,8 +7,7 @@ import fs from 'fs/promises';
 import { fileURLToPath } from 'url';
 
 import { parseResume } from './parsers/resumeParser.js';
-import { calculateATSScore } from './scoring/scoreCalculator.js';
-import { generateExplanation } from './ai/explanationGenerator.js';
+import { validateResume, scoreResumeWithAI, formatAIExplanation } from './ai/aiScorer.js';
 import { getAvailableRoles } from './scoring/roleWeights.js';
 
 // ES module path setup
@@ -69,7 +68,11 @@ const upload = multer({
  * Health check endpoint
  */
 app.get('/api/health', (req, res) => {
-    res.json({ status: 'ok', message: 'Resume ATS Score Generator API is running' });
+    res.json({
+        status: 'ok',
+        message: 'Resume ATS Score Generator API is running',
+        scoringMethod: 'AI-Powered (OpenAI GPT-4)'
+    });
 });
 
 /**
@@ -215,15 +218,30 @@ app.post('/api/analyze', upload.single('resume'), async (req, res) => {
         // 1. Parse resume
         const resumeText = await parseResume(filePath, mimetype);
 
-        // 2. Calculate score
-        const scoreResult = calculateATSScore(resumeText, {
+        // 2. Validate that it's actually a resume using AI
+        const validation = await validateResume(resumeText);
+
+        if (!validation.isResume || validation.confidence < 60) {
+            // Clean up file
+            await fs.unlink(filePath);
+
+            return res.status(400).json({
+                error: 'Invalid Resume',
+                message: `This doesn't appear to be a resume. ${validation.reason}`,
+                isToast: true,
+                validation
+            });
+        }
+
+        // 3. AI-powered scoring (replaces deterministic scoring)
+        const scoreResult = await scoreResumeWithAI(resumeText, {
             mode,
             jobDescription: jobDescription || '',
             targetRole: targetRole || 'general'
         });
 
-        // 3. Generate AI explanation
-        const aiResult = await generateExplanation(scoreResult);
+        // 4. Format explanation
+        const explanation = formatAIExplanation(scoreResult);
 
         // Clean up uploaded file
         await fs.unlink(filePath);
@@ -231,9 +249,9 @@ app.post('/api/analyze', upload.single('resume'), async (req, res) => {
         res.json({
             success: true,
             scoreResult,
-            explanation: aiResult.explanation,
-            suggestions: aiResult.suggestions,
-            generatedBy: aiResult.generatedBy
+            explanation,
+            suggestions: scoreResult.improvementSuggestions,
+            generatedBy: 'openai-gpt4-ai-scoring'
         });
     } catch (error) {
         console.error('Analysis error:', error);
@@ -248,7 +266,8 @@ app.post('/api/analyze', upload.single('resume'), async (req, res) => {
         }
 
         res.status(500).json({
-            error: error.message || 'Failed to analyze resume'
+            error: error.message || 'Failed to analyze resume',
+            isToast: true
         });
     }
 });
