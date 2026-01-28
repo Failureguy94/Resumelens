@@ -1,7 +1,8 @@
 import OpenAI from 'openai';
 
 const openai = new OpenAI({
-    apiKey: process.env.OPENAI_API_KEY
+    apiKey: process.env.GOOGLE_API_KEY,
+    baseURL: process.env.GEMINI_API_BASE_URL
 });
 
 /**
@@ -10,13 +11,13 @@ const openai = new OpenAI({
  * @returns {Promise<Object>} - Validation result
  */
 export async function validateResume(text) {
-    if (!process.env.OPENAI_API_KEY || process.env.OPENAI_API_KEY === 'your_openai_api_key_here') {
-        throw new Error('OpenAI API key is required for AI-powered scoring. Please add it to your .env file.');
+    if (!process.env.GOOGLE_API_KEY) {
+        throw new Error('Google API key is required for AI-powered scoring. Please add it to your .env file.');
     }
 
     try {
         const completion = await openai.chat.completions.create({
-            model: 'gpt-4o-mini',
+            model: 'gemini-1.5-flash',
             messages: [
                 {
                     role: 'system',
@@ -80,8 +81,8 @@ Respond with JSON only.`
 export async function scoreResumeWithAI(resumeText, evaluationParams) {
     const { mode, jobDescription, targetRole } = evaluationParams;
 
-    if (!process.env.OPENAI_API_KEY || process.env.OPENAI_API_KEY === 'your_openai_api_key_here') {
-        throw new Error('OpenAI API key is required for AI-powered scoring. Please add it to your .env file.');
+    if (!process.env.GOOGLE_API_KEY) {
+        throw new Error('Google API key is required for AI-powered scoring. Please add it to your .env file.');
     }
 
     try {
@@ -96,7 +97,7 @@ export async function scoreResumeWithAI(resumeText, evaluationParams) {
         }
 
         const completion = await openai.chat.completions.create({
-            model: 'gpt-4o-mini',
+            model: 'gemini-1.5-flash',
             messages: [
                 {
                     role: 'system',
