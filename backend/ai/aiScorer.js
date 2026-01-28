@@ -1,9 +1,17 @@
 import OpenAI from 'openai';
 
-const openai = new OpenAI({
-    apiKey: process.env.GOOGLE_API_KEY,
-    baseURL: process.env.GEMINI_API_BASE_URL
-});
+// Lazy initialization to ensure dotenv has loaded
+let openai = null;
+
+function getOpenAIClient() {
+    if (!openai) {
+        openai = new OpenAI({
+            apiKey: process.env.GOOGLE_API_KEY,
+            baseURL: 'https://generativelanguage.googleapis.com/v1beta/openai/'
+        });
+    }
+    return openai;
+}
 
 /**
  * Validate if the uploaded document is actually a resume
@@ -16,8 +24,8 @@ export async function validateResume(text) {
     }
 
     try {
-        const completion = await openai.chat.completions.create({
-            model: 'gemini-1.5-flash',
+        const completion = await getOpenAIClient().chat.completions.create({
+            model: 'gemini-2.0-flash',
             messages: [
                 {
                     role: 'system',
@@ -96,8 +104,8 @@ export async function scoreResumeWithAI(resumeText, evaluationParams) {
             contextInstruction = 'Evaluate this resume for general ATS compatibility and professional quality.';
         }
 
-        const completion = await openai.chat.completions.create({
-            model: 'gemini-1.5-flash',
+        const completion = await getOpenAIClient().chat.completions.create({
+            model: 'gemini-2.0-flash',
             messages: [
                 {
                     role: 'system',
