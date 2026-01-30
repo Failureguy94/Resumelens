@@ -6,8 +6,8 @@ let openai = null;
 function getOpenAIClient() {
     if (!openai) {
         openai = new OpenAI({
-            apiKey: process.env.GOOGLE_API_KEY,
-            baseURL: 'https://generativelanguage.googleapis.com/v1beta/openai/'
+            apiKey: process.env.LLM_API_KEY,
+            baseURL: 'https://openrouter.ai/api/v1'
         });
     }
     return openai;
@@ -19,13 +19,13 @@ function getOpenAIClient() {
  * @returns {Promise<Object>} - Validation result
  */
 export async function validateResume(text) {
-    if (!process.env.GOOGLE_API_KEY) {
-        throw new Error('Google API key is required for AI-powered scoring. Please add it to your .env file.');
+    if (!process.env.LLM_API_KEY) {
+        throw new Error('LLM API key is required for AI-powered scoring. Please add it to your .env file.');
     }
 
     try {
         const completion = await getOpenAIClient().chat.completions.create({
-            model: 'gemini-2.0-flash',
+            model: 'google/gemini-2.0-flash-001',
             messages: [
                 {
                     role: 'system',
@@ -89,8 +89,8 @@ Respond with JSON only.`
 export async function scoreResumeWithAI(resumeText, evaluationParams) {
     const { mode, jobDescription, targetRole } = evaluationParams;
 
-    if (!process.env.GOOGLE_API_KEY) {
-        throw new Error('Google API key is required for AI-powered scoring. Please add it to your .env file.');
+    if (!process.env.LLM_API_KEY) {
+        throw new Error('LLM API key is required for AI-powered scoring. Please add it to your .env file.');
     }
 
     try {
@@ -105,7 +105,7 @@ export async function scoreResumeWithAI(resumeText, evaluationParams) {
         }
 
         const completion = await getOpenAIClient().chat.completions.create({
-            model: 'gemini-2.0-flash',
+            model: 'google/gemini-2.0-flash-001',
             messages: [
                 {
                     role: 'system',
