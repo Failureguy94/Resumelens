@@ -162,67 +162,7 @@ export default function ScoreResults({ analysisResult }) {
                     </button>
                 </section>
 
-                {/* Detailed Breakdown Sections */}
-                <section className="detailed-breakdown fade-in">
-                    <h2 className="section-heading">Detailed Analysis</h2>
 
-                    {/* Skills that Helped */}
-                    {breakdown.roleAlignment.details.coreSkills?.length > 0 && (
-                        <div className="detail-card">
-                            <h3> Skills That Helped</h3>
-                            <div className="skill-tags">
-                                {breakdown.roleAlignment.details.coreSkills.slice(0, 10).map((item, index) => (
-                                    <span key={index} className="skill-tag core">
-                                        {item.skill}
-                                        <span className="skill-weight">Core • {Math.round(item.weight * 100)}%</span>
-                                    </span>
-                                ))}
-                            </div>
-                            {breakdown.roleAlignment.details.transferableSkills?.length > 0 && (
-                                <>
-                                    <h4 className="subsection-title">Transferable Skills</h4>
-                                    <div className="skill-tags">
-                                        {breakdown.roleAlignment.details.transferableSkills.slice(0, 8).map((item, index) => (
-                                            <span key={index} className="skill-tag transferable">
-                                                {item.skill}
-                                                <span className="skill-weight">Transferable • {Math.round(item.weight * 100)}%</span>
-                                            </span>
-                                        ))}
-                                    </div>
-                                </>
-                            )}
-                        </div>
-                    )}
-
-                    {/* Missing Skills */}
-                    {breakdown.roleAlignment.details.missingCoreSkills?.length > 0 && (
-                        <div className="detail-card">
-                            <h3> Missing Core Skills</h3>
-                            <div className="skill-tags">
-                                {breakdown.roleAlignment.details.missingCoreSkills.map((skill, index) => (
-                                    <span key={index} className="skill-tag missing">
-                                        {skill}
-                                    </span>
-                                ))}
-                            </div>
-                            <p className="detail-hint">
-                                Adding these skills could significantly improve your score
-                            </p>
-                        </div>
-                    )}
-
-                    {/* Formatting Issues */}
-                    {breakdown.formatting.details.issues?.length > 0 && (
-                        <div className="detail-card">
-                            <h3>⚠️ Formatting Issues</h3>
-                            <ul className="issue-list">
-                                {breakdown.formatting.details.issues.map((issue, index) => (
-                                    <li key={index}>{issue}</li>
-                                ))}
-                            </ul>
-                        </div>
-                    )}
-                </section>
             </div>
         </div>
     );

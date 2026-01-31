@@ -158,16 +158,9 @@ app.post('/api/score', async (req, res) => {
         // For job link mode, use the job description (frontend should fetch/paste it)
         const effectiveJobDescription = jobDescription || '';
 
-        // Calculate deterministic ATS score
-        const scoreResult = calculateATSScore(resumeText, {
-            mode,
-            jobDescription: effectiveJobDescription,
-            targetRole: targetRole || 'general'
-        });
-
-        res.json({
-            success: true,
-            scoreResult
+        // This endpoint is deprecated - use /api/analyze instead
+        res.status(400).json({
+            error: 'Use the /api/analyze endpoint for scoring'
         });
     } catch (error) {
         console.error('Scoring error:', error);
@@ -188,12 +181,9 @@ app.post('/api/explain', async (req, res) => {
             return res.status(400).json({ error: 'Score result is required' });
         }
 
-        // Generate AI-powered explanation and suggestions
-        const aiResult = await generateExplanation(scoreResult);
-
-        res.json({
-            success: true,
-            ...aiResult
+        // This endpoint is deprecated - use /api/analyze instead
+        res.status(400).json({
+            error: 'Use the /api/analyze endpoint for scoring'
         });
     } catch (error) {
         console.error('Explanation error:', error);
