@@ -49,83 +49,35 @@ export default function ScoreCard({ category, expanded, onToggle }) {
             </button>
 
             {expanded && (
-                <div className="score-card-details">
-                    {category.key === 'keywordRelevance' && (
-                        <>
-                            {details.matchedKeywords?.length > 0 && (
-                                <div className="detail-section">
-                                    <h4>Matched Keywords</h4>
-                                    <div className="keyword-list">
-                                        {details.matchedKeywords.slice(0, 10).map((kw, i) => (
-                                            <span key={i} className="keyword-tag matched">{kw.term}</span>
-                                        ))}
-                                    </div>
-                                </div>
-                            )}
-                            {details.missingKeywords?.length > 0 && (
-                                <div className="detail-section">
-                                    <h4>Missing Keywords</h4>
-                                    <div className="keyword-list">
-                                        {details.missingKeywords.slice(0, 8).map((kw, i) => (
-                                            <span key={i} className="keyword-tag missing">{kw.term}</span>
-                                        ))}
-                                    </div>
-                                </div>
-                            )}
-                        </>
-                    )}
-
-                    {category.key === 'roleAlignment' && (
-                        <>
+                    <div className="score-card-details">
+                        {details?.reasoning && (
                             <div className="detail-section">
-                                <div className="stat-row">
-                                    <span>Core Skills Match</span>
-                                    <strong>{details.coreSkillPercentage || 0}%</strong>
-                                </div>
-                                <div className="stat-row">
-                                    <span>Core Skills Found</span>
-                                    <strong>{details.coreSkills?.length || 0}</strong>
-                                </div>
-                                <div className="stat-row">
-                                    <span>Transferable Skills</span>
-                                    <strong>{details.transferableSkills?.length || 0}</strong>
-                                </div>
+                                <p className="reasoning-text">{details.reasoning}</p>
                             </div>
-                        </>
-                    )}
-
-                    {category.key === 'structure' && (
-                        <div className="detail-section">
-                            {details.present?.length > 0 && (
-                                <div className="stat-row">
-                                    <span>Present Sections</span>
-                                    <strong>{details.present.join(', ')}</strong>
-                                </div>
-                            )}
-                            {details.missing?.length > 0 && (
-                                <div className="stat-row warning">
-                                    <span>Missing Sections</span>
-                                    <strong>{details.missing.join(', ')}</strong>
-                                </div>
-                            )}
-                        </div>
-                    )}
-
-                    {category.key === 'formatting' && (
-                        <div className="detail-section">
-                            {details.passed && (
-                                <p className="success-message">✅ No formatting issues detected!</p>
-                            )}
-                            {details.issues?.length > 0 && (
-                                <ul className="issues-list">
-                                    {details.issues.map((issue, i) => (
-                                        <li key={i}>⚠️ {issue}</li>
+                        )}
+                        
+                        {details?.strengths?.length > 0 && (
+                            <div className="detail-section">
+                                <h4>✅ Strengths</h4>
+                                <ul className="strengths-list">
+                                    {details.strengths.map((strength, i) => (
+                                        <li key={i}>{strength}</li>
                                     ))}
                                 </ul>
-                            )}
-                        </div>
-                    )}
-                </div>
+                            </div>
+                        )}
+
+                        {details?.weaknesses?.length > 0 && (
+                            <div className="detail-section">
+                                <h4>⚠️ Areas for Improvement</h4>
+                                <ul className="weaknesses-list">
+                                    {details.weaknesses.map((weakness, i) => (
+                                        <li key={i}>{weakness}</li>
+                                    ))}
+                                </ul>
+                            </div>
+                        )}
+                    </div>
             )}
         </div>
     );

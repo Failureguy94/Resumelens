@@ -6,8 +6,8 @@ let openai = null;
 function getOpenAIClient() {
     if (!openai) {
         openai = new OpenAI({
-            apiKey: process.env.LLM_API_KEY,
-            baseURL: 'https://openrouter.ai/api/v1'
+            apiKey: process.env.GOOGLE_API_KEY,
+            baseURL: process.env.GEMINI_API_BASE_URL || 'https://generativelanguage.googleapis.com/v1beta/openai/'
         });
     }
     return openai;
@@ -19,13 +19,13 @@ function getOpenAIClient() {
  * @returns {Promise<Object>} - Validation result
  */
 export async function validateResume(text) {
-    if (!process.env.LLM_API_KEY) {
-        throw new Error('LLM API key is required for AI-powered scoring. Please add it to your .env file.');
+    if (!process.env.GOOGLE_API_KEY) {
+        throw new Error('Google API key is required for AI-powered scoring. Please add it to your .env file.');
     }
 
     try {
         const completion = await getOpenAIClient().chat.completions.create({
-            model: 'google/gemini-2.0-flash-001',
+            model: 'gemini-2.5-flash-lite',
             messages: [
                 {
                     role: 'system',
@@ -46,7 +46,12 @@ NOT valid resumes:
 - Technical documentation (unless it's a tech writer's portfolio)
 - Code snippets alone (unless part of a developer resume)
 
-Respond with JSON only.`
+Respond with JSON only in the exact following format:
+{
+  "isResume": <boolean>,
+  "confidence": <number 0-100>,
+  "reason": "<explanation>"
+}`
                 },
                 {
                     role: 'user',
@@ -58,7 +63,13 @@ Respond with JSON only.`
             max_tokens: 300
         });
 
-        const result = JSON.parse(completion.choices[0].message.content);
+        let content = completion.choices[0].message.content.trim();
+        if (content.startsWith('```json')) {
+            content = content.replace(/^```json\n?/, '').replace(/\n?```$/, '');
+        } else if (content.startsWith('```')) {
+            content = content.replace(/^```\n?/, '').replace(/\n?```$/, '');
+        }
+        const result = JSON.parse(content);
         return {
             isResume: result.isResume || false,
             confidence: result.confidence || 0,
@@ -89,8 +100,8 @@ Respond with JSON only.`
 export async function scoreResumeWithAI(resumeText, evaluationParams) {
     const { mode, jobDescription, targetRole } = evaluationParams;
 
-    if (!process.env.LLM_API_KEY) {
-        throw new Error('LLM API key is required for AI-powered scoring. Please add it to your .env file.');
+    if (!process.env.GOOGLE_API_KEY) {
+        throw new Error('Google API key is required for AI-powered scoring. Please add it to your .env file.');
     }
 
     try {
@@ -105,7 +116,7 @@ export async function scoreResumeWithAI(resumeText, evaluationParams) {
         }
 
         const completion = await getOpenAIClient().chat.completions.create({
-            model: 'google/gemini-2.0-flash-001',
+            model: 'gemini-2.5-flash-lite',
             messages: [
                 {
                     role: 'system',
@@ -121,8 +132,13 @@ Key responsibilities:
 5. **Dynamic Evaluation**: Create relevant scoring categories based on the resume content
 6. **Actionable Feedback**: Provide specific, helpful improvement suggestions
 
+Important Tech Context:
+- HEAVILY REWARD high-tier technical achievements like Competitive Programming ranks (e.g., Candidate Master on Codeforces, ICPC regional/world finalist, Leetcode Guardian). These are extreme indicators of algorithmic problem-solving ability and should dramatically boost the score (often pushing it well into the 90+ range).
+- High-impact open source contributions, elite hackathon wins, or advanced technical research should also result in very high scores regardless of minor formatting imperfections.
+- Do not strictly penalize tech candidates for lack of corporate "fluff" if their technical prowess is highly proven through these competitive/open-source channels.
+
 Scoring Guidelines:
-- 90-100: Exceptional resume, strong candidate
+- 90-100: Exceptional resume, strong candidate (Includes top competitive programmers, elite open-source devs)
 - 75-89: Good resume, qualified candidate
 - 60-74: Decent resume, needs improvements
 - 40-59: Weak resume, significant issues
@@ -172,7 +188,13 @@ Respond in JSON format:
             max_tokens: 2000
         });
 
-        const analysis = JSON.parse(completion.choices[0].message.content);
+        let content = completion.choices[0].message.content.trim();
+        if (content.startsWith('```json')) {
+            content = content.replace(/^```json\n?/, '').replace(/\n?```$/, '');
+        } else if (content.startsWith('```')) {
+            content = content.replace(/^```\n?/, '').replace(/\n?```$/, '');
+        }
+        const analysis = JSON.parse(content);
 
         // Ensure proper structure
         return {
